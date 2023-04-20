@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Hello World, this from template register</h1>
+    <form action="/submit-register" method="POST">
+
+        <label for="fname">First Name:</label>
+        <input type="text" id="fname" name="fname" 
+        placeholder="first name" maxlength="50" required>
+
+        <br><br>
+
+        <label for="lname">Last Name:</label>
+        <input type="text" id="lname" name="lname" 
+        placeholder="last name" maxlength="50" required>
+        
+        <br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" 
+        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+        title="Must be a valid email address"
+        placeholder="email" maxlength="100" required>
+
+        <br><br>
+
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" 
+        placeholder="username" maxlength="50" required>
+
+        <br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" 
+        placeholder="password" maxlength="50"
+        pattern="(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}" 
+        title="Must contain at least one number, one special character, 
+        one letter, and be at least 8 characters long" 
+        required>
+
+        <br><br>
+
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" 
+        placeholder="date of birth" required>
+
+        <br><br>
+
+        <button type="submit">Register</button>
+    </form>
+{% endblock %}
+
