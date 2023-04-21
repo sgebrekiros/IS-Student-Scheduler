@@ -9,7 +9,6 @@ app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:Hakila3944@localhos
 db = SQLAlchemy(app)
 
 
-
 # The class Student inherits from the class Model in the module db.
 # Table name is students for login and register
 class Student(db.Model):
@@ -31,6 +30,34 @@ class Student(db.Model):
         self.username = username
         self.password = password
         self.dob = dob
+
+# The class Task inherits from the class Model in the module db.
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    task_id = db.Column(db.Integer, primary_key=True)
+    task_name = db.Column(db.String(50))
+    subject = db.Column(db.String(50))
+    deadline = db.Column(db.DateTime)
+    estimated_time = db.Column(db.DateTime)
+    task_percentage = db.Column(db.Integer)
+    description = db.Column(db.String(100))
+    priority = db.Column(db.Integer)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+    student = db.relationship('Student', backref=db.backref('tasks', lazy=True))
+
+class Event(db.Model):
+    __tablename__ = 'events'
+    event_id = db.Column(db.Integer, primary_key=True)
+    event_name = db.Column(db.String(50))
+    subject = db.Column(db.String(50))
+    date = db.Column(db.DateTime)
+    time_start = db.Column(db.DateTime)
+    time_end = db.Column(db.DateTime)
+    repeat = db.Column(db.string(50))
+    description = db.Column(db.String(100))
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+    student = db.relationship('Student', backref=db.backref('assignments', lazy=True))
+
 
 # home page
 @app.route('/')
@@ -59,31 +86,12 @@ def submit_register():
 
     return render_template('login.html')
 
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
-"""
+# login page
 @app.route('/login')
 def login():
     return render_template('login.html')
 
-@app.route('/submit-login', methods=['POST, GET'])
-def submit_login():
-    username = request.form['username']
-    password = request.form['password']
-
-        # check if the username and password are correct from postgresql
-    student = Student.query.filter_by(username=username, password=password).first()
-    if student:
-        return render_template('dashboard.html')
-    else:
-        # if the username and password are incorrect return an error message
-        return render_template('register.html', error='Invalid username or password')
-"""
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
+# takes in the form data from the login page, checks user information, takes to dashboard
 @app.route('/submit-login', methods=['POST'])
 def submit_login():
     error = None
@@ -96,11 +104,12 @@ def submit_login():
     else:
         # if the username and password are incorrect, display an error message
         error = 'Invalid username or password'
-        return render_template('dashboard.html', error=error)
+        return render_template('login.html', error=error)
 
-
-
-
+# dashboard page
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
 if __name__== "__main__":
     # in production enviroment mark debug as false
