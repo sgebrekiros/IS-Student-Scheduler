@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask import flash
@@ -183,8 +183,28 @@ def delete_task(task_id):
         abort(403) # Forbidden, the user is not allowed to delete this task
     db.session.delete(task_to_delete)
     db.session.commit()
-    flash('Task has been deleted!', 'success')
+    flash('Task has been deleted!', 'success') 
     return redirect(url_for('show_tasks'))
+
+@app.route('/update-task/<int:task_id>', methods=['POST'])
+@login_required
+def update_task(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+    return redirect(url_for)
+    
+    data = request.get_json()
+    task.task_name = data.get('task_name', task.task_name)
+    task.subject = data.get('subject', task.subject)
+    task.due_date = data.get('due_date', task.due_date)
+    task.estimated_time = data.get('estimated_time', task.estimated_time)
+    task.task_percentage = data.get('task_percentage', task.task_percentage)
+    task.description = data.get('description', task.description)
+    
+    db.session.commit()
+    
+    return jsonify({'message': 'Task updated successfully'})
 
 # events page
 # @app.route('/add-events')
