@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask import flash
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thisisasecret'
@@ -28,17 +29,22 @@ class Student(db.Model, UserMixin):
     username = db.Column(db.String(50))
     password = db.Column(db.String(50))
     dob = db.Column(db.DateTime)
+    major1= db.Column(db.String(50))
+    major2 = db.Column(db.String(50))
+
 
 # The constructor takes in arguments such as fname, lname, and 
 # email and assigns them to instance variables with the same names.
-    def __init__(self, fname, lname, email, username, password, dob):
+    def __init__(self, fname, lname, email, username, password, dob, major1, major2):
         self.fname = fname
         self.lname = lname
         self.email = email
         self.username = username
         self.password = password
         self.dob = dob
-
+        self.major1 = major1
+        self.major2 = major2
+        
 # The class Task inherits from the class Model in the module db.
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -50,10 +56,11 @@ class Task(db.Model):
     task_percentage = db.Column(db.Integer)
     description = db.Column(db.String(100))
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+    priority = db.Column(db.Integer)
     student = db.relationship('Student', backref=db.backref('tasks', lazy=True))
 
 # Constructor method for Task class to create new task objects
-    def __init__(self, task_name, subject, due_date, estimated_time, task_percentage, description, student_id):
+    def __init__(self, task_name, subject, due_date, estimated_time, task_percentage, description, student_id, priority):
         self.task_name = task_name
         self.subject = subject
         self.due_date = due_date
@@ -61,6 +68,7 @@ class Task(db.Model):
         self.task_percentage = task_percentage
         self.description = description
         self.student_id = student_id
+        self.priority = priority
 
 # The class Event inherits from the class Model in the module db.
 # class Event(db.Model):
@@ -87,6 +95,56 @@ class Task(db.Model):
 #         self.description = description
 #         self.student_id = current_user.id
 
+# Calculate priority based on task percentage, subject, and due date
+def calculate_priority(task_percentage, subject, due_date):
+    # Section of calculate priority based on task percentage
+    task_percentage = int(task_percentage)
+    priority = 0
+    if task_percentage >= 15:
+        priority += 2
+    elif task_percentage >= 5:
+        priority += 1
+    else:
+        priority += 0
+    print(priority)
+
+    # Get student major from registration page
+    student_id = Student.query.get(current_user.id)
+    student_major = student_id.major1
+    student_major2 = student_id.major2
+    student_major = clean_text(student_major)
+    student_major2 = clean_text(student_major2)
+    subject = clean_text(subject)
+    # Section of calculate priority based on subject
+    if student_major == subject or student_major2 == subject:
+        priority += 1
+    else:
+        priority += 0
+    print(priority)
+
+    # due_date = datetime.strptime(task_data['due_date'], '%Y-%m-%d')  # Assuming due_date is in YYYY-MM-DD format
+    current_date = datetime.now()
+    due_date = datetime.strptime(due_date, '%Y-%m-%d')
+    days_until_due = (due_date - current_date).days
+    # Section of calculate priority based on due date
+    if days_until_due > -1 and days_until_due <= 1:
+        priority += 2
+    elif days_until_due > 1 and days_until_due <= 3:
+        priority += 1
+    else:
+        priority += 0
+    print(type(days_until_due))
+    print(days_until_due)
+    print(priority)
+    print(due_date)
+    print(current_date)
+    return priority
+
+# Clean text to lowercase and remove leading and trailing spaces
+def clean_text(text):
+    text = text.strip().lower()
+    return text
+
 # home page
 @app.route('/')
 def index():
@@ -106,9 +164,11 @@ def submit_register():
     username = request.form['username']
     password = request.form['password']
     dob = request.form['dob']
+    major1 = request.form['major1']
+    major2 = request.form['major2']
 
-# create a new student object and add it to the database
-    student = Student(fname, lname, email, username, password, dob)
+    # create a new student object and add it to the database
+    student = Student(fname, lname, email, username, password, dob, major1, major2)
     db.session.add(student)
     db.session.commit()
 
@@ -133,7 +193,7 @@ def submit_login():
     if student is not None:
         # if the username and password are correct, redirect to dashboard
         login_user(student)
-        return redirect(url_for('tasks'))
+        return redirect(url_for('show_tasks'))
     else:
         # if the username and password are incorrect, display an error message
         error = 'Invalid username or password'
@@ -160,14 +220,15 @@ def submit_tasks():
     task_percentage = request.form['task_percentage']
     description = request.form['description']
     student_id = current_user.id
+    priority = calculate_priority(task_percentage, subject, due_date)
 
 # create a new task object and add it to the database
-    tasks = Task(task_name, subject, due_date, estimated_time, task_percentage, description, student_id)
+    tasks = Task(task_name, subject, due_date, estimated_time, task_percentage, description, student_id, priority)
     tasks.student = current_user
     db.session.add(tasks)
     db.session.commit()
 
-    return render_template('dashboard.html')
+    return redirect(url_for('show_tasks'))
 
 @app.route('/show-tasks')
 @login_required
@@ -189,22 +250,27 @@ def delete_task(task_id):
 @app.route('/update-task/<int:task_id>', methods=['POST'])
 @login_required
 def update_task(task_id):
-    task = Task.query.get(task_id)
-    if not task:
-        return jsonify({'error': 'Task not found'}), 404
-    return redirect(url_for)
-    
+    task = Task.query.get_or_404(task_id)
     data = request.get_json()
-    task.task_name = data.get('task_name', task.task_name)
-    task.subject = data.get('subject', task.subject)
-    task.due_date = data.get('due_date', task.due_date)
-    task.estimated_time = data.get('estimated_time', task.estimated_time)
-    task.task_percentage = data.get('task_percentage', task.task_percentage)
-    task.description = data.get('description', task.description)
+    task.task_name = data.get('Name', task.task_name)
+    task.subject = data.get('Subject', task.subject)
+    # task.due_date = data.get('due_date', task.due_date)
+    # task.estimated_time = data.get('estimated_time', task.estimated_time)
+    # task.task_percentage = data.get('task_percentage', task.task_percentage)
+    task.description = data.get('Description', task.description)
     
     db.session.commit()
     
     return jsonify({'message': 'Task updated successfully'})
+
+@app.route('/get_task_data/<int:task_id>')
+def get_task_data(task_id):
+    task = Task.query.get(task_id)
+    return jsonify({
+        'name': task.task_name,
+        'subject': task.subject,
+        'description': task.description
+    })
 
 # events page
 # @app.route('/add-events')

@@ -1,0 +1,24 @@
+jquery
+$.get('/get_task_data/' + taskId, function(data) {
+    $('#task_name').val(data.name);
+    $('#subject').val(data.subject);
+    $('#due_date').val(data.due_date);
+    $('#estimated_time').val(data.estimated_time);
+    $('#task_percentage').val(data.task_percentage);
+    $('#description').val(data.description);
+
+modal
+    <input type="text" id="task_name" name="task_name" placeholder="task name" maxlength="50" required>
+    <input type="text" id="subject" name="subject" placeholder="subject" maxlength="50">
+    <input type="date" id="due_date" name="due_date" placeholder="due date">
+    <input type="time" id="estimated_time" name="estimated_time" placeholder="estimated time">
+    <input type="number" id="task_percentage" name="task_percentage" placeholder="task percentage">
+    <input type="text" id="description" name="description" placeholder="description">
+
+flask
+        'task_name': task.task_name,
+        'subject': task.subject,
+        'due_date': task.due_date,
+        'estimated_time':task.estimated_time,
+        'task_percentage':task.task_percentage,
+        'description': task.description

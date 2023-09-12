@@ -2,5 +2,12 @@
 
 {% block content %}
     <!--<h1>Hello World, this from template</h1>-->
-    <h1>Success you're logged in</h1>
+    <h1>Welcome to the home page</h1>
+    <h3>Register here: </h3>
+    <button type="button" class="btn btn-primary" 
+    onclick="window.location.href='/register'">Register</button>
+    <br><br>
+    <h3>Login here: </h3>
+    <button type="button" class="btn btn-primary"
+    onclick="window.location.href='/login'">Login</button>
 {% endblock %}

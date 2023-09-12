@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>Hello User</h1>
     <body>
       <div class="container">
-        <h1 class="my-4">Your Tasks</h1>
-        
+        <h1 class="my-4">Your Tasks</h1>\
+          <label for="add-task">Add Task:</label>
+          <button type="button" class="btn btn-primary" id="add-task"
+          onclick="window.location.href='/add-tasks'">Add Task</button>
           <table class="table">
             <thead>
               <tr>
@@ -29,10 +30,8 @@
                 <td>{{ task.task_percentage }}</td>
                 <td>{{ task.description }}</td>
                 <td>
-                  <!-- <form action="{{url_for('update_task', task_id=task.task_id)}}" method="POST">
-                  <button type="submit" class="btn btn-danger">Update</button></td> -->
-                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#update-modal">
-                    Launch demo modal
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#update-modal" data-task-id="{{ task.task_id }}">
+                    Edit Task
                   </button>
                 </td>
                 <td>
@@ -41,28 +40,83 @@
                   </form>
                 </td>  
               </tr>
-                  
-                  {% endfor %}
-                </tbody>
     <!-- Modal -->
                 <div class="modal fade" id="update-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="modal-title">Modal title</h5>
-                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
+                        <h5 class="modal-title" id="modal-title">Edit Task</h5>
                       </div>
                       <div class="modal-body">
-                        <h5>hi</h5>
+                        <form id="update-form">
+                          <label for="Name">Name:</label>
+                          <input type="text" id="Name" name="Name" class="form-control" placeholder="Name" >
+                          <label for="Subject">Subject:</label>
+                          <input type="text" id="Subject" name="Subject" class="form-control" placeholder="Subject">
+                          <label for="Description">Description:</label>
+                          <input type="text" id="Description" name="Description" class="form-control" placeholder="Description">
+                          <button type="button" id="update-button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                        </form>
                       </div>
                         <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" id="update-button2" class="btn btn-primary">Save changes</button> <!--Problem 1-->
                       </div>
                     </div>
                   </div>
-                </div>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
 
-{% endblock %}
+<script>
+  $(document).ready(function() {
+    $('#update-modal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var taskId = button.data('task-id'); // Extract task ID from data- attribute
+        console.log('Task ID:', taskId);
+        // Make AJAX call to Flask route to fetch task data
+        $.get('/get_task_data/' + taskId, function(data) {
+            $('#Name').val(data.name);
+            $('#Subject').val(data.subject)
+            $('#Description').val(data.description);
+            
+        });
+    });
+  });
+  let taskId;  // Declare this at a higher scope the error i was talking about :(
+
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.querySelector('.modal');
+  const myForm = document.getElementById('update-form');
+  const submitButton = document.getElementById('update-button');
+  $('#update-modal').on('show.bs.modal', function(event) {
+    const button = $(event.relatedTarget);
+    taskId = button.data('task-id');  // Set the taskId here
+  });
+
+  // Listen for the click event of the submit button
+  submitButton.addEventListener('click', function() {
+    const formData = new FormData(myForm);
+    // Create an object to hold the form data
+    const data = {
+      'Name': formData.get('Name'),
+      'Subject': formData.get('Subject'),
+      'Description': formData.get('Description')
+    };
+
+    // Make the AJAX request setting the taskId as a URL parameter
+    $.ajax({
+      url: '/update-task/' + taskId,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      success: function(response) {
+        alert(response.message); // Assuming server sends {message: 'Task updated successfully'}
+      }
+    });
+  });
+});
+
+</script>
+        {% endblock %}

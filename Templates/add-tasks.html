@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Hello World, this from dashboard template</h1>
     <form action="/submit-task" method="POST">
         <label for="task_name">Task Name:</label>
         <input type="text" id="task_name" name="task_name" 
@@ -39,6 +38,8 @@
 
         <br><br>
 
+        <button type="button" class="btn btn-primary"
+        onclick="window.location.href='/show-tasks'">Cancel</button>
         <button type="submit">Add Task</button>
     </form>
 

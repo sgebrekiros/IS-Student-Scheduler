@@ -32,11 +32,7 @@
 
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" 
-        placeholder="password" maxlength="50"
-        pattern="(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}" 
-        title="Must contain at least one number, one special character, 
-        one letter, and be at least 8 characters long" 
-        required>
+        placeholder="password" maxlength="50" required>
 
         <br><br>
 
@@ -45,6 +41,16 @@
         placeholder="date of birth" required>
 
         <br><br>
+
+        <label for="major">Major (fill if known):</label>
+        <input type="text" id="major" name="major"
+        placeholder="Feel free to share your major if you'd like" maxlength="50">
+
+        <br><br>
+
+        <label for="major 2">Second Major :</label>
+        <input type="text" id="major 2" name="major 2"
+        placeholder="Feel free to share your second major if you'd like" maxlength="50">
 
         <button type="submit">Register</button>
     </form>
