@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask import flash
 from datetime import datetime
+import time
+import threading
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thisisasecret'
@@ -52,7 +54,7 @@ class Task(db.Model):
     task_name = db.Column(db.String(50))
     subject = db.Column(db.String(50))
     due_date = db.Column(db.Date)
-    estimated_time = db.Column(db.Time)
+    estimated_time = db.Column(db.Integer)
     task_percentage = db.Column(db.Integer)
     description = db.Column(db.String(100))
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
@@ -95,6 +97,198 @@ class Task(db.Model):
 #         self.description = description
 #         self.student_id = current_user.id
 
+# 6 queues, 1 for each possible priority
+priority_0 = []
+priority_1 = []
+priority_2 = []
+priority_3 = []
+priority_4 = []
+priority_5 = []
+
+#### Algorithm for MLFQ priority queue ####
+
+# adds all priority queues to a list and returns it
+def all_priority(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5):
+    all_priority = []
+    all_priority.append(priority_5)
+    all_priority.append(priority_4)
+    all_priority.append(priority_3)
+    all_priority.append(priority_2)
+    all_priority.append(priority_1)
+    all_priority.append(priority_0)
+    return all_priority
+
+# finds the highest non-empty priority queue and returns it
+def max_priority(all_priority):
+    max_priority = []
+    for priority in all_priority:
+        if priority:
+            for item in priority:
+                max_priority.append(item)
+                print("max_priority: ", max_priority)
+            return max_priority
+
+# finds the second non-empty priority queue and returns it
+def middle_priority(all_priority):
+    middle_priority = []
+    counter = 0
+    for priority in all_priority:
+        if priority:
+            counter += 1
+            if counter == 2:
+                for item in priority:
+                    middle_priority.append(item)
+                    print("middle_priority: ", middle_priority)
+                return middle_priority
+
+# finds the remaining non-empty priority queue and returns it
+def min_priority(all_priority):
+    min_priority = []
+    counter = 0
+    for priority in all_priority:
+        if priority:
+            print("test2: ", priority)
+            counter += 1
+            if counter >= 3:
+                for item in priority:
+                    min_priority.append(item)
+                    print("min_priority: ", min_priority)
+    return min_priority
+
+# pops items from a queue to be displayed on the calendar
+# once the queue is empty, the queue is filled again
+
+# def run(priority, temp_queue): 
+#     if priority:
+#         temp_queue.append(priority[0])
+#         print("temp_queue: ", temp_queue)
+#         new_task = priority.pop(0)
+#         print("new_task: ", new_task)
+
+#         return new_task
+
+# def run2(priority, temp_queue):
+#     for item in priority:
+#         if priority:
+#             new_task = run(priority, temp_queue)
+            
+#     if not priority:
+#         for item in temp_queue:
+#             priority.append(item)
+#         temp_queue.clear()
+
+# def run3(max_priority, middle_priority, min_priority):
+#     run2(max_priority)
+#     run2(max_priority)
+#     run2(middle_priority)
+#     run2(max_priority)
+#     run2(min_priority)
+#     run
+
+
+#### End of MLFQ Functions ####
+
+# fills queue in regards to task priority
+def fill_queue():
+    # fetch
+    data = Task.query.filter_by(student_id=current_user.id).all()
+    # student_id = Student.query.get(current_user.id)
+    for item in data:
+        if item.priority == 0:
+            priority_0.append(item)
+        elif item.priority == 1:
+            priority_1.append(item)
+        elif item.priority == 2:
+            priority_2.append(item)
+        elif item.priority == 3:
+            priority_3.append(item)
+        elif item.priority == 4:
+            priority_4.append(item)
+        elif item.priority == 5:
+            priority_5.append(item)
+
+    #### Testing MLFQ Functions ####
+
+    # complete_priority = all_priority(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5)
+    # highest_priority = max_priority(complete_priority)
+    # second_priority = middle_priority(complete_priority)
+    # lowest_priority = min_priority(complete_priority)
+    # print("highest priority: ", highest_priority)
+    # print("second priority: ", second_priority)
+    # print("lowest priority: ", lowest_priority)
+
+    #### Testing Priority Scheduling Functions ####
+    high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5)
+    run_task()
+    return
+
+
+#### Algorithm for priority scheduling ####
+
+# gets the first task from the highest non empty priority queue
+def high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5):
+    # if priority 5 is not empty, return the first task, else checks the following priority queues
+    if priority_5:
+        return priority_5[0]
+    elif priority_4:
+        return priority_4[0]
+    elif priority_3:
+        return priority_3[0]
+    elif priority_2:
+        return priority_2[0]
+    elif priority_1:
+        return priority_1[0]
+    elif priority_0:
+        return priority_0[0]
+    else:
+        return None
+
+def run_task():
+    hp_task = high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5)
+    if hp_task:
+        # get task estimated time
+        estimated_time = hp_task.estimated_time
+        while estimated_time > 0:
+            time.sleep(2)
+            estimated_time -= 1
+            print(estimated_time)
+            print('p:', hp_task.priority)
+            # update estimated time with new value
+            hp_task.estimated_time = estimated_time
+            db.session.commit()
+            print('priority 4: ', priority_4)
+        # remove task from queue
+        if hp_task.estimated_time == 0:
+            print('hp_task: ', hp_task)
+            # db.session.delete(hp_task)
+            # db.session.commit()
+            if hp_task.priority == 0:
+                priority_0.pop(0)
+            elif hp_task.priority == 1:
+                priority_1.pop(0)
+            elif hp_task.priority == 2:
+                priority_2.pop(0)
+            elif hp_task.priority == 3:
+                priority_3.pop(0)
+            elif hp_task.priority == 4:
+                priority_4.pop(0)
+            elif hp_task.priority == 5:
+                priority_5.pop(0)
+            run_task()
+            print("priority 4: ", priority_4)
+            print("priority 5: ", priority_5)
+            print("priority 0: ", priority_0)
+            print("priority 1: ", priority_1)
+            print("priority 2: ", priority_2)
+            print("priority 3: ", priority_3)
+    else:
+        print("No task to run")
+    
+#### End of Priority Scheduling Functions ####
+        
+        
+
+
 # Calculate priority based on task percentage, subject, and due date
 def calculate_priority(task_percentage, subject, due_date):
     # Section of calculate priority based on task percentage
@@ -133,11 +327,6 @@ def calculate_priority(task_percentage, subject, due_date):
         priority += 1
     else:
         priority += 0
-    print(type(days_until_due))
-    print(days_until_due)
-    print(priority)
-    print(due_date)
-    print(current_date)
     return priority
 
 # Clean text to lowercase and remove leading and trailing spaces
@@ -234,6 +423,7 @@ def submit_tasks():
 @login_required
 def show_tasks():
     tasks = Task.query.filter_by(student_id=current_user.id).all()
+    fill_queue()
     return render_template('show-tasks.html', tasks=tasks)
 
 @app.route('/delete-task/<int:task_id>', methods=['POST'])
