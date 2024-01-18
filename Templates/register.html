@@ -1,58 +1,131 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Hello World, this from template register</h1>
-    <form action="/submit-register" method="POST">
+    <div class="form-container">
+        <h2>Please Input Your Information</h2>
+        <form action="/submit-register" method="POST">
+            <label for="fname">First Name:</label>
+            <input type="text" id="fname" name="fname" 
+            placeholder="  First Name" maxlength="50" required>
+
+            <br><br>
+
+            <label for="lname">Last Name:</label>
+            <input type="text" id="lname" name="lname" 
+            placeholder="  Last Name" maxlength="50" required>
+            
+            <br><br>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" 
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+            title="Must be a valid email address"
+            placeholder="  Email" maxlength="100" required>
+
+            <br><br>
+
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" 
+            placeholder="Username" maxlength="50" required>
+
+            <br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" 
+            placeholder="  Password" maxlength="50" required>
+
+            <br><br>
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" 
+            placeholder="  Date of Birth" required>
+
+            <br><br>
+
+            <label for="major">Major (fill if known):</label>
+            <input type="text" id="major" name="major"
+            placeholder="  Major(optional)" maxlength="50">
+
+            <br><br>
+
+            <label for="major2">Second Major:</label>
+            <input type="text" id="major2" name="major2"
+            placeholder="  Second Major(optional)" maxlength="50">
+
+            <br><br>
+            
+            <button type="button" class="red-btn"
+            onclick="window.location.href='/'">Cancel</button>
+            <button class="round-button" type="submit">Register</button>
+        </form>
+    </div>
+
+    <style>
+        body {
+            background-image: url(https://coolbackgrounds.io/images/backgrounds/index/ranger-4df6c1b6.png);
+            background-size: cover;
+            margin: 0; 
+            overflow: hidden;
+            color: white;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.5); 
+            z-index: -1; 
+        }
     
-        <label for="fname">First Name:</label>
-        <input type="text" id="fname" name="fname" 
-        placeholder="first name" maxlength="50" required>
-
-        <br><br>
-
-        <label for="lname">Last Name:</label>
-        <input type="text" id="lname" name="lname" 
-        placeholder="last name" maxlength="50" required>
-        
-        <br><br>
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" 
-        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-        title="Must be a valid email address"
-        placeholder="email" maxlength="100" required>
-
-        <br><br>
-
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" 
-        placeholder="username" maxlength="50" required>
-
-        <br><br>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" 
-        placeholder="password" maxlength="50" required>
-
-        <br><br>
-
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob" 
-        placeholder="date of birth" required>
-
-        <br><br>
-
-        <label for="major">Major (fill if known):</label>
-        <input type="text" id="major" name="major"
-        placeholder="Feel free to share your major if you'd like" maxlength="50">
-
-        <br><br>
-
-        <label for="major 2">Second Major :</label>
-        <input type="text" id="major 2" name="major 2"
-        placeholder="Feel free to share your second major if you'd like" maxlength="50">
-
-        <button type="submit">Register</button>
-    </form>
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            font-family: 'Arial', sans-serif; 
+            font-style: normal;
+            color: white;
+        }
+    
+        .form-container label, .form-container input, .form-container button {
+            font-style: normal;
+            color: white; 
+        }
+    
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"] {
+            background-color: rgba(33, 43, 32, 0.5); 
+            border: 1px solid #ddd;
+            border-radius: 15px; 
+        }
+    
+        .round-button {
+            background-color: darkgreen;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 auto;
+        }
+    
+        .red-btn {
+            background-color: #dc3545;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 auto;
+        }
+    </style>
+    
 {% endblock %}
+
 

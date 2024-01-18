@@ -1,13 +1,95 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <!--<h1>Hello World, this from template</h1>-->
-    <h1>Welcome to the home page</h1>
-    <h3>Register here: </h3>
-    <button type="button" class="btn btn-primary" 
-    onclick="window.location.href='/register'">Register</button>
-    <br><br>
-    <h3>Login here: </h3>
-    <button type="button" class="btn btn-primary"
-    onclick="window.location.href='/login'">Login</button>
+<div class="container">
+    <div class="main-content">
+        <h1>Welcome to TaskScheduler</h1>
+        <div class="action-group">
+            <h3>Get Started</h3>
+            <button type="button" class="round-button register-btn"
+            onclick="window.location.href='/register'">Register</button>
+            <p>or</p>
+            <button type="button" class="round-button login-btn"
+            onclick="window.location.href='/login'">Login</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-image: url(https://coolbackgrounds.io/images/backgrounds/index/ranger-4df6c1b6.png);
+        background-size: cover;
+        margin: 0; 
+        font-family: 'Arial', sans-serif; 
+        overflow: hidden;
+    }
+
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: -1; 
+    }
+
+    .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        color: white;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .main-content {
+        max-width: 600px;
+        background-color: rgba(0, 0, 0, 0.5); 
+        padding: 40px;
+        border-radius: 15px;
+    }
+
+    h1 {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+    }
+
+    .action-group h3 {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+    }
+
+    .round-button {
+        border-radius: 25px;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 1em;
+        margin: 10px 0;
+    }
+
+    .round-button.register-btn {
+        background-color: darkgreen; 
+        color: white;
+    }
+
+    .round-button.login-btn {
+        background-color: #007BFF; 
+        color: white;
+    }
+
+    .round-button:hover {
+        transform: scale(1.05); 
+    }
+
+    p {
+        font-size: 1em;
+        margin: 10px 0;
+    }
+</style>
 {% endblock %}

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<body>
+    <div class="container">
+        <h1 class="my-4">Task Scheduler</h1>
+
+        <!-- Start Task Button -->
+        <button type="button" class="start-btn">Start Task</button>
+
+        <!-- Current Task Table -->
+        <h2 class="section-title">Current Task</h2>
+        <div class="task-table current-task">
+            <div class="task-row header">
+                <div class="task-cell">Task Name</div>
+                <div class="task-cell">Estimated Time</div>
+                <div class="task-cell">Priority</div>
+            </div>
+            <div class="task-row">
+                <div class="task-cell" id="current-task-name">{{ output }}</div>
+                <div class="task-cell" id="current-task-time">{{ estimated_time }}</div>
+                <div class="task-cell" id="current-task-priority">{{ priority }}</div>
+            </div>
+        </div>
+        <!-- Socket.io JS -->
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+        <!-- JavaScript for handling Socket.IO -->
+        <script>
+            document.addEventListener('DOMContentLoaded', (event) => {
+                var socket = io.connect('http://' + document.domain + ':' + location.port);
+        
+                socket.on('task_update', function(data) {
+                console.log('Task update received', data);
+                if (data.error) {
+                    document.getElementById('current-task-name').textContent = "No task available";
+                    document.getElementById('current-task-time').textContent = "N/A";
+                    document.getElementById('current-task-priority').textContent = "N/A";
+                } else {
+                    document.getElementById('current-task-name').textContent = data.task_name;
+                    document.getElementById('current-task-time').textContent = data.estimated_time;
+                    document.getElementById('current-task-priority').textContent = data.priority;
+                }
+            });
+        
+                var startButton = document.querySelector('.start-btn');
+                if (startButton) {
+                    startButton.addEventListener('click', () => {
+                        socket.emit('start_task'); 
+                    });
+                } 
+            });
+        </script>        
+        
+    </div>
+    
+    <style>
+        body {
+            background-image: url(https://coolbackgrounds.io/images/backgrounds/index/ranger-4df6c1b6.png);
+            background-size: cover;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            font-style: normal;
+            color: white;
+        }
+
+        .form-container label, .form-container input, .form-container button {
+            font-style: normal;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"] {
+            background-color: rgba(33, 43, 32, 0.5);
+            border: 1px solid #ddd;
+            border-radius: 15px;
+        }
+
+        .round-button {
+            background-color: darkgreen;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 3em auto;
+            padding: 2em;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            border-bottom: 2px solid #333;
+            margin-bottom: 1em;
+            padding-bottom: 0.5em;
+        }
+
+        .start-btn {
+            display: block;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            background-color: darkgreen;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .start-btn:hover {
+            background-color: #0a9800;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .task-row {
+            display: flex;
+        }
+
+        .task-cell {
+            flex: 1;
+            padding: 0.5em 1em;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .current-task .header .task-cell, 
+        .upcoming-tasks .header .task-cell {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+    </style>
+</body>
+{% endblock %}

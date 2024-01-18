@@ -1,25 +1,95 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Hello, this from dashboard template</h1>
-    <h1>Login</h1>
 
-    {% if error %}
-    <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    
+    <div class="form-container">
+        <h3>Please input username and password</h3>
+
+        {% if error %}
+        <p style="color: red;">{{ error }}</p>
+        {% endif %}
+
         <form method="POST" action="{{ url_for('submit_login') }}">
-        
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required>
 
-        <br><br>
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" required>
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required>
+            <br><br>
 
-        <br><br>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
 
-        <input type="submit" value="Login">
-  </form>
+            <br><br>
+
+            <button type="button" class="red-btn"
+            onclick="window.location.href='/'">Cancel</button>
+            <input class="round-button" type="submit" value="Login">
+        </form>
+    </div>
+
+    <style>
+        body {
+            background-image: url(https://coolbackgrounds.io/images/backgrounds/index/ranger-4df6c1b6.png);
+            background-size: cover;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            font-style: normal;
+            color: white;
+        }
+
+        .form-container label, .form-container input, .form-container button {
+            font-style: normal;
+            color: white;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"] {
+            background-color: rgba(33, 43, 32, 0.5);
+            border: 1px solid #ddd;
+            border-radius: 15px;
+        }
+
+        .round-button {
+            background-color: darkgreen;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .red-btn {
+            background-color: #dc3545;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 auto;
+        }
+    </style>
 {% endblock %}

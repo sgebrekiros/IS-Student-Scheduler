@@ -2,19 +2,20 @@ from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask import flash
+from flask_socketio import SocketIO, emit
 from datetime import datetime
 import time
-import threading
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thisisasecret'
+socketio = SocketIO(app)
 
 # login manager to manage user sessions
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-######## change password to environment variable later ########
 app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:Hakila3944@localhost:5433/scheduler'
 
 db = SQLAlchemy(app)
@@ -245,7 +246,7 @@ def high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_
 
 def run_task():
     hp_task = high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5)
-    if hp_task:
+    if hp_task is not None:
         # get task estimated time
         estimated_time = hp_task.estimated_time
         while estimated_time > 0:
@@ -256,6 +257,7 @@ def run_task():
             # update estimated time with new value
             hp_task.estimated_time = estimated_time
             db.session.commit()
+            emit_task_update() # This will emit the update to the front end
             print('priority 4: ', priority_4)
         # remove task from queue
         if hp_task.estimated_time == 0:
@@ -275,19 +277,10 @@ def run_task():
             elif hp_task.priority == 5:
                 priority_5.pop(0)
             run_task()
-            print("priority 4: ", priority_4)
-            print("priority 5: ", priority_5)
-            print("priority 0: ", priority_0)
-            print("priority 1: ", priority_1)
-            print("priority 2: ", priority_2)
-            print("priority 3: ", priority_3)
     else:
         print("No task to run")
     
 #### End of Priority Scheduling Functions ####
-        
-        
-
 
 # Calculate priority based on task percentage, subject, and due date
 def calculate_priority(task_percentage, subject, due_date):
@@ -328,6 +321,51 @@ def calculate_priority(task_percentage, subject, due_date):
     else:
         priority += 0
     return priority
+
+def emit_task_update():
+    current_task = high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5)
+    if current_task:
+        socketio.emit('task_update', {
+            'task_name': current_task.task_name,
+            'estimated_time': current_task.estimated_time,
+            'priority': current_task.priority
+        })
+    else:
+        socketio.emit('task_update', {'error': 'No tasks available!'})
+
+
+@socketio.on('start_task')
+def handle_start_task():
+    fill_queue()
+    run_task()  # Start the task scheduling when the event is received.
+
+@app.route('/get_current_task')
+def get_current_task():
+    # Your code to fetch the current task
+    current_task = high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5)
+    if current_task:
+        return jsonify({'task_name': current_task.task_name, 'estimated_time': current_task.estimated_time, 'priority': current_task.priority})
+    return jsonify({'error': 'No tasks available!'})
+
+@app.route('/scheduler')
+def scheduler():
+    hp_task = high_priority_task(priority_0, priority_1, priority_2, priority_3, priority_4, priority_5)
+    
+    if hp_task:
+        task_name = hp_task.task_name or "No task name provided"
+        estimated_time = hp_task.estimated_time or "No estimated time provided"
+        priority = hp_task.priority or "No priority provided"
+    else:
+        task_name = "No task available"
+        estimated_time = "N/A"
+        priority = "N/A"
+
+    upcoming_tasks = priority_0 + priority_1 + priority_2 + priority_3 + priority_4 + priority_5
+    if hp_task in upcoming_tasks:
+        upcoming_tasks.remove(hp_task)  # Exclude the current highest priority task from the upcoming list
+    
+    return render_template('scheduler.html', output=task_name, estimated_time=estimated_time, priority=priority, upcoming_tasks=upcoming_tasks)
+
 
 # Clean text to lowercase and remove leading and trailing spaces
 def clean_text(text):
@@ -388,11 +426,6 @@ def submit_login():
         error = 'Invalid username or password'
         return render_template('login.html', error=error)
 
-# dashboard page
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
-
 # tasks page
 @app.route('/add-tasks')
 @login_required 
@@ -423,7 +456,6 @@ def submit_tasks():
 @login_required
 def show_tasks():
     tasks = Task.query.filter_by(student_id=current_user.id).all()
-    fill_queue()
     return render_template('show-tasks.html', tasks=tasks)
 
 @app.route('/delete-task/<int:task_id>', methods=['POST'])
@@ -488,6 +520,7 @@ def get_task_data(task_id):
 if __name__== "__main__":
     # in production enviroment mark debug as false
     app.run(debug=True) 
+    socketio.run(app, debug=True) 
     # WARNING: This is a development server. Do not use it in a production deployment. 
     # Use a production WSGI server instead. Check later cause might need to switch servers
 

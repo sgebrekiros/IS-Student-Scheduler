@@ -1,76 +1,85 @@
+
 {% extends "base.html" %}
 
 {% block content %}
-    <body>
-      <div class="container">
-        <h1 class="my-4">Your Tasks</h1>\
-          <label for="add-task">Add Task:</label>
-          <button type="button" class="btn btn-primary" id="add-task"
-          onclick="window.location.href='/add-tasks'">Add Task</button>
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">Task Name</th>
-                <th scope="col">Subject</th>
-                <th scope="col">Due Date</th>
-                <th scope="col">Estimated Time</th>
-                <th scope="col">Task Percentage</th>
-                <th scope="col">Description</th>
-                <th scope="col">Update</th>
-                <th scope="col">Delete</th>
-              </tr>
-            </thead>
-          <tbody>
-            {% for task in tasks %}
-              <tr>
-                <td>{{ task.task_name }}</td>
-                <td>{{ task.subject }}</td>
-                <td>{{ task.due_date }}</td>
-                <td>{{ task.estimated_time }}</td>
-                <td>{{ task.task_percentage }}</td>
-                <td>{{ task.description }}</td>
-                <td>
-                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#update-modal" data-task-id="{{ task.task_id }}">
-                    Edit Task
-                  </button>
-                </td>
-                <td>
-                  <form action="{{url_for('delete_task', task_id=task.task_id)}}" method="POST">
-                  <button type="submit" class="btn btn-danger">Delete</button></td>
-                  </form>
-                </td>  
-              </tr>
-    <!-- Modal -->
-                <div class="modal fade" id="update-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="modal-title">Edit Task</h5>
-                      </div>
-                      <div class="modal-body">
-                        <form id="update-form">
-                          <label for="Name">Name:</label>
-                          <input type="text" id="Name" name="Name" class="form-control" placeholder="Name" >
-                          <label for="Subject">Subject:</label>
-                          <input type="text" id="Subject" name="Subject" class="form-control" placeholder="Subject">
-                          <label for="Description">Description:</label>
-                          <input type="text" id="Description" name="Description" class="form-control" placeholder="Description">
-                          <button type="button" id="update-button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
-                        </form>
-                      </div>
-                        <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" id="update-button2" class="btn btn-primary">Save changes</button> <!--Problem 1-->
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
 
-<script>
-  $(document).ready(function() {
+<body>
+  <div class="container">
+    <h1 class="header-title">Your Tasks</h1>
+
+    <!-- Add Task Button -->
+    <div class="add-task-section">
+      <label for="add-task" class="add-task-label">Add Task:</label>
+      <button type="button" class="btn add-btn" id="add-task" onclick="window.location.href='/add-tasks'">Add Task</button>
+    </div>
+
+    <!-- Task Table -->
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th scope="col">Task Name</th>
+          <th scope="col">Subject</th>
+          <th scope="col">Due Date</th>
+          <th scope="col">Estimated Time</th>
+          <th scope="col">Task Percentage</th>
+          <th scope="col">Description</th>
+          <th scope="col">Update</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>{{ task.task_name }}</td>
+          <td>{{ task.subject }}</td>
+          <td>{{ task.due_date }}</td>
+          <td>{{ task.estimated_time }}</td>
+          <td>{{ task.task_percentage }}</td>
+          <td>{{ task.description }}</td>
+          <td>
+            <button type="button" class="round-button" data-bs-toggle="modal" data-bs-target="#update-modal" data-task-id="{{ task.task_id }}">
+              Edit Task
+            </button>
+          </td>
+          <td>
+            <form action="{{url_for('delete_task', task_id=task.task_id)}}" method="POST">
+              <button type="submit" class="btn delete-btn">Delete</button>
+            </form>
+          </td>
+        </tr>
+        <!-- Modal -->
+        <div class="modal fade" id="update-modal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modal-title">Edit Task</h5>
+              </div>
+              <div class="modal-body">
+                <form id="update-form">
+                  <label for="Name">Name:</label>
+                  <input type="text" id="Name" name="Name" class="form-control" placeholder="Name">
+                  <label for="Subject">Subject:</label>
+                  <input type="text" id="Subject" name="Subject" class="form-control" placeholder="Subject">
+                  <label for="Description">Description:</label>
+                  <input type="text" id="Description" name="Description" class="form-control" placeholder="Description">
+                  <button type="button" class="btn delete-btn" data-bs-dismiss="modal">Close</button>
+                  <button type="button" id="update-button" class="round-button" data-bs-dismiss="modal">Save changes</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Scheduler Button -->
+    <button class="round-button" type="button" class="btn primary-btn scheduler-btn" onclick="window.location.href='/scheduler'">Go to Scheduler</button>
+  </div>
+
+  <!-- Scripts remain the same -->
+  <script>
+    $(document).ready(function() {
     $('#update-modal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var taskId = button.data('task-id'); // Extract task ID from data- attribute
@@ -84,26 +93,26 @@
         });
     });
   });
-  let taskId;  // Declare this at a higher scope the error i was talking about :(
+    let taskId;  // Declare this at a higher scope the error i was talking about :(
 
-document.addEventListener('DOMContentLoaded', function() {
-  const modal = document.querySelector('.modal');
-  const myForm = document.getElementById('update-form');
-  const submitButton = document.getElementById('update-button');
-  $('#update-modal').on('show.bs.modal', function(event) {
-    const button = $(event.relatedTarget);
-    taskId = button.data('task-id');  // Set the taskId here
-  });
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.querySelector('.modal');
+      const myForm = document.getElementById('update-form');
+      const submitButton = document.getElementById('update-button');
+      $('#update-modal').on('show.bs.modal', function(event) {
+        const button = $(event.relatedTarget);
+        taskId = button.data('task-id');  // Set the taskId here
+      });
 
-  // Listen for the click event of the submit button
-  submitButton.addEventListener('click', function() {
-    const formData = new FormData(myForm);
-    // Create an object to hold the form data
-    const data = {
-      'Name': formData.get('Name'),
-      'Subject': formData.get('Subject'),
-      'Description': formData.get('Description')
-    };
+    // Listen for the click event of the submit button
+    submitButton.addEventListener('click', function() {
+      const formData = new FormData(myForm);
+      // Create an object to hold the form data
+      const data = {
+        'Name': formData.get('Name'),
+        'Subject': formData.get('Subject'),
+        'Description': formData.get('Description')
+      };
 
     // Make the AJAX request setting the taskId as a URL parameter
     $.ajax({
@@ -117,6 +126,133 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+  </script>
 
-</script>
-        {% endblock %}
+  <style>
+  body {
+        background-image: url(https://coolbackgrounds.io/images/backgrounds/index/ranger-4df6c1b6.png);
+        background-size: cover;
+        text-align: center;
+      }
+
+      body::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: -1;
+      }
+
+      .form-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          text-align: center;
+          font-family: 'Arial', sans-serif;
+          font-style: normal;
+          color: white;
+      }
+
+      .form-container label, .form-container input, .form-container button {
+          font-style: normal;
+      }
+
+      .round-button {
+            background-color: darkgreen;
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+    .container {
+      max-width: 900px;
+      margin: 3em auto;
+      padding: 2em;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-title {
+      color: #333;
+      text-align: center;
+      margin-bottom: 1em;
+    }
+
+    .add-task-section {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .add-task-label {
+      margin-right: 10px;
+    }
+
+    .btn {
+      border-radius: 5px;
+      padding: 0.5em 1em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+
+    .btn.secondary-btn {
+      background-color: #6c757d;
+      color: #FFF;
+      border: none;
+    }
+
+    .btn.edit-btn {
+      background-color: #ffc107;
+      color: #333;
+    }
+
+    .btn.delete-btn {
+      background-color: #dc3545;
+      color: #FFF;
+    }
+
+    .btn.add-btn {
+      background-color: darkgreen;
+      color: #FFF;
+      border-radius: 20px;
+    }
+
+    .btn:hover {
+      filter: brightness(0.9);
+    }
+
+    .task-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5em;
+    }
+
+    .task-table th, .task-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .task-table thead {
+      background-color: #f2f2f2;
+    }
+
+    .scheduler-btn {
+      display: block;
+      width: 200px;
+      margin: 2em auto;
+    }
+  </style>
+</body>
+{% endblock %}
